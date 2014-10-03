@@ -7,7 +7,7 @@ import copy
 
 skinThickArray, skinAlphaArray, sylgardThickArray, sylgardC10Array, g1Array, g2Array, ginfArray = np.genfromtxt('./csvs/simprop.csv', delimiter=',').T
 runFiber = True
-doAnalysis = False
+doAnalysis = True
 skipWait = True
 
 def runSimulation(baseModelName, materialBlock):
@@ -53,8 +53,6 @@ for (level, sylgardC10) in enumerate(sylgardC10Array):
 
 # Vary skin viscoelasticity
 for (level, ginf) in enumerate(ginfArray):
-    if level > 0:
-        continue
     # Get g1, g2, ginf
     g1 = g1Array[level]
     g2 = g2Array[level]
