@@ -5,10 +5,10 @@ from readodb import *
 
 # Set default stim block for displ
 _displtimecoeff = np.loadtxt('./csvs/displtimecoeff.csv', delimiter=',')
-stimBlockDefault = {'holdDisplArray': np.r_[.04:.16:4j]}
+stimBlockDefault = {'holdDisplArray': np.r_[.032:.16:5j]}
 stimBlockDefault['rampLiftTimeArray'] = np.polyval(_displtimecoeff, stimBlockDefault['holdDisplArray'])
 # Set default stim block for force
-stimBlockDefaultForce = {'holdForceArray': np.r_[1.5e-3:6e-3:4j]}
+stimBlockDefaultForce = {'holdForceArray': np.r_[1.2e-3:6e-3:5j]}
 _displforce = np.loadtxt('./csvs/FitFemDisplforce.csv', delimiter=',')
 eqdisp = np.interp(stimBlockDefaultForce['holdForceArray'], _displforce[:, 1], _displforce[:, 0]*1e3)
 stimBlockDefaultForce['rampLiftTimeArray'] = np.polyval(_displtimecoeff, eqdisp)
