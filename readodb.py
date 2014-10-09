@@ -6,9 +6,9 @@ from commontools import *
 
 def getOutputs(jobName, save2csv=True):
     if os.path.exists('./'+jobName+'.odb'):
-        odb = odbAccess.openOdb('./'+jobName+'.odb', readOnly=True)
+        odb = session.openOdb('./'+jobName+'.odb', readOnly=True)
     else:
-        odb = odbAccess.openOdb('./odbs/'+jobName+'.odb', readOnly=True)
+        odb = session.openOdb('./odbs/'+jobName+'.odb', readOnly=True)
     rpNode = odb.rootAssembly.instances['TIP-1'].nodes[0]
     mcncElemSet = odb.rootAssembly.instances['SKIN_SUBSTRATE-1'].elementSets['MCNC_EL']
     time, force, displ, stress, strain, sener = [], [], [], [], [], []

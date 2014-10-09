@@ -19,6 +19,4 @@ import visualization
 import xyPlot
 import displayGroupOdbToolset as dgo
 import connectorBehavior
-# For odb access
-import odbAccess
 import numpy as np

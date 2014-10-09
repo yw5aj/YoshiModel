@@ -34,9 +34,10 @@ for (level, skinAlpha) in enumerate(skinAlphaArray):
     materialBlock['skin_alpha'] = skinAlpha
     runSimulation('SkinAlpha%d'%level, materialBlock)
 
-
 # Vary sylgard thickness
 for (level, sylgardThick) in enumerate(sylgardThickArray):
+    # if level < 4:
+        # continue
     # Assign material properties
     materialBlock = copy.deepcopy(materialBlockDefault)
     materialBlock['thicknessAll'][2] = sylgardThick
@@ -60,4 +61,5 @@ for (level, ginf) in enumerate(ginfArray):
     materialBlock = copy.deepcopy(materialBlockDefault)
     materialBlock['skin_g_array'] = [ginf, g2, g1]
     runSimulation('SkinGinf%d'%level, materialBlock)
+
 
