@@ -1,0 +1,23 @@
+# Abaqus temp files
+*.rpy*
+*.pyc
+*.cae
+*.jnl
+*.log
+
+# Archive
+*archive
+
+# Output files
+*.odb
+*.csv
+
+# Exclude figures
+*.png
+*.pdf
+*.psd
+*.eps
+
+# Office files
+*.xls*
+*.doc*

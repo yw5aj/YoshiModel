@@ -19,4 +19,5 @@ import visualization
 import xyPlot
 import displayGroupOdbToolset as dgo
 import connectorBehavior
+# My own imports
 import numpy as np

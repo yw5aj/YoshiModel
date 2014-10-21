@@ -77,10 +77,11 @@ def getSurfaceDistribution(jobName):
             elementLabels=elemLabelTuple)
         return nextMcncElemSet
     mcncElemSetList = [mcncElemSet]
-    # Note that celem_no = cnode_no - 1
-    for i in range(cnode_no-2):
-        mcncElemSetList.append(getNextMcncElemSet(mcncElemSetList[-1]))
     cnode_no = len(odb.steps.values()[0].frames[0].fieldOutputs['CPRESS   ASSEMBLY_S_SURF-3/ASSEMBLY_TIP-1_RIGIDSURFACE_'].values)
+    celem_no = cnode_no - 1
+    for i in range(celem_no-1):
+        mcncElemSetList.append(getNextMcncElemSet(mcncElemSetList[-1]))
+    # Initialize empty lists
     time = []
     cpress, cnodex, cnodeu1, cnodeu2 = [], [], [], []
     xcoordOldList, xcoordNewList, stressList, strainList, senerList = [], [], [], [], []
@@ -136,9 +137,9 @@ def getSurfaceDistribution(jobName):
     np.savetxt('./csvs/%s_cxold.csv'%jobName, cnodex, delimiter=',')
     np.savetxt('./csvs/%s_cy.csv'%jobName, cnodeu2, delimiter=',')
     np.savetxt('./csvs/%s_cxnew.csv'%jobName, np.array(cnodex)+np.array(cnodeu1), delimiter=',')
-    np.savetxt('./csvs/%s_mcncxold.csv'%jobName, xcoordOldList, delimiter=',')
-    np.savetxt('./csvs/%s_mcncxnew.csv'%jobName, xcoordNewList, delimiter=',')
-    np.savetxt('./csvs/%s_mcncstress.csv'%jobName, stressList, delimiter=',')
-    np.savetxt('./csvs/%s_mcncstrain.csv'%jobName, strainList, delimiter=',')
-    np.savetxt('./csvs/%s_mcncsener.csv'%jobName, senerList, delimiter=',')
+    np.savetxt('./csvs/%s_mxold.csv'%jobName, xcoordOldList, delimiter=',')
+    np.savetxt('./csvs/%s_mxnew.csv'%jobName, xcoordNewList, delimiter=',')
+    np.savetxt('./csvs/%s_mstress.csv'%jobName, stressList, delimiter=',')
+    np.savetxt('./csvs/%s_mstrain.csv'%jobName, strainList, delimiter=',')
+    np.savetxt('./csvs/%s_msener.csv'%jobName, senerList, delimiter=',')
     return
