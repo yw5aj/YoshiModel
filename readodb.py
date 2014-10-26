@@ -84,7 +84,7 @@ def getSurfaceDistribution(jobName):
     # Initialize empty lists
     time = []
     cpress, cnodex, cnodeu1, cnodeu2 = [], [], [], []
-    xcoordOldList, xcoordNewList, stressList, strainList, senerList = [], [], [], [], []
+    xcoordOldList, xcoordNewList, stressList, strainList, senerList, yDisplList = [], [], [], [], [], []
     # Iterate through frames to get data
     for i, step in enumerate(odb.steps.values()):
         for frame in step.frames:
@@ -107,26 +107,30 @@ def getSurfaceDistribution(jobName):
             stressList.append([])
             strainList.append([])
             senerList.append([])
+            yDisplList.append([])
             def getMcncElemSetOutput(mcncElemSet):
                 def getXcoordFromMcncElemSet(mcncElemSet):
                     nodeSet = [odb.rootAssembly.instances['SKIN_SUBSTRATE-1'].nodes[nodeLabel-1] for nodeLabel in mcncElemSet.elements[0].connectivity]
                     xcoordOldList = [node.coordinates[0] for node in nodeSet]
                     xDisplList = [frame.fieldOutputs['U'].getSubset(region=node).values[0].data[0] for node in nodeSet]
+                    yU2List = [frame.fieldOutputs['U'].getSubset(region=node).values[0].data[1] for node in nodeSet]
                     xcoordOld = np.mean(xcoordOldList)
                     xcoordNew = np.mean(np.array(xcoordOldList) + np.array(xDisplList))
-                    return xcoordOld, xcoordNew
-                xcoordOld, xcoordNew = getXcoordFromMcncElemSet(mcncElemSet)
+                    yU2 = np.mean(yU2List)
+                    return xcoordOld, xcoordNew, yU2
+                xcoordOld, xcoordNew, yU2 = getXcoordFromMcncElemSet(mcncElemSet)
                 stress = -.5*frame.fieldOutputs['S'].getSubset(region=mcncElemSet).values[0].minPrincipal\
                     -.5*frame.fieldOutputs['S'].getSubset(region=mcncElemSet).values[1].minPrincipal
                 strain = -.5*frame.fieldOutputs['LE'].getSubset(region=mcncElemSet).values[0].minPrincipal\
                     -.5*frame.fieldOutputs['LE'].getSubset(region=mcncElemSet).values[1].minPrincipal
                 sener = .5*frame.fieldOutputs['SENER'].getSubset(region=mcncElemSet).values[0].data\
                     +.5*frame.fieldOutputs['SENER'].getSubset(region=mcncElemSet).values[1].data
-                return xcoordOld, xcoordNew, stress, strain, sener
+                return xcoordOld, xcoordNew, yU2, stress, strain, sener
             for mcncElemSet in mcncElemSetList:
-                xcoordOld, xcoordNew, stress, strain, sener = getMcncElemSetOutput(mcncElemSet)
+                xcoordOld, xcoordNew, yU2, stress, strain, sener = getMcncElemSetOutput(mcncElemSet)
                 xcoordOldList[-1].append(xcoordOld)
                 xcoordNewList[-1].append(xcoordNew)
+                yDisplList[-1].append(yU2)
                 stressList[-1].append(stress)
                 strainList[-1].append(strain)
                 senerList[-1].append(sener)
@@ -142,4 +146,5 @@ def getSurfaceDistribution(jobName):
     np.savetxt('./csvs/%s_mstress.csv'%jobName, stressList, delimiter=',')
     np.savetxt('./csvs/%s_mstrain.csv'%jobName, strainList, delimiter=',')
     np.savetxt('./csvs/%s_msener.csv'%jobName, senerList, delimiter=',')
+    np.savetxt('./csvs/%s_my.csv'%jobName, yDisplList, delimiter=',')
     return
