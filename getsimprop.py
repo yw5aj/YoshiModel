@@ -5,7 +5,7 @@ Created on Sun May  4 20:46:55 2014
 @author: Yuxiang Wang
 """
 
-import numpy as np
+import numpy as np, pandas as pd
 from scipy.io import loadmat
 
 def get_simprop(data):
@@ -47,4 +47,5 @@ if __name__ == '__main__':
                           simprop['g1'], simprop['g2'], simprop['ginf'],
                          ]
     np.savetxt('./csvs/simprop.csv', simprop_array, delimiter=',')
-
+    # Save dataframe to excel
+    pd.DataFrame(simprop).to_excel('./csvs/simprop.xlsx')
