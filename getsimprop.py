@@ -7,6 +7,7 @@ Created on Sun May  4 20:46:55 2014
 
 import numpy as np, pandas as pd
 from scipy.io import loadmat
+import matplotlib.pyplot as plt
 
 def get_simprop(data):
     median = np.median(data)
@@ -33,6 +34,7 @@ if __name__ == '__main__':
     for prop in prop_list:
         simprop[prop] = get_simprop(globals()[prop])
     # Manually adjust ginf and g1, g2
+    real_ginf_min = simprop['ginf'][0]
     simprop['ginf'][0] = .15
     p = np.polyfit(ginf, g1, 1)
     simprop['g1'] = np.polyval(p, simprop['ginf'])
@@ -47,5 +49,27 @@ if __name__ == '__main__':
                           simprop['g1'], simprop['g2'], simprop['ginf'],
                          ]
     np.savetxt('./csvs/simprop.csv', simprop_array, delimiter=',')
-    # Save dataframe to excel
+    #%% Save dataframe to excel
     pd.DataFrame(simprop).to_excel('./csvs/simprop.xlsx')
+    #%% Plot out as boxplots
+    fig, axs = plt.subplots()
+    bp_labels = [r'Thickness ($\mu$m)', 'Modulus', 'Viscoelasticity']
+    bp_array = np.c_[thickness, alpha, ginf]
+    bp = axs.boxplot(bp_array/bp_array.mean(axis=0), labels=bp_labels)
+    bp_feature_array = np.c_[simprop_array[:, 0], simprop_array[:, 1], 
+                            simprop_array[:, 6]]
+    bp_feature_array[0, 2] = real_ginf_min
+#    for line in bp.values():
+#        plt.setp(line, color='k')
+    axs.set_yticks([])
+    axs.set_ylim(bottom=-.1)
+    for i in range(len(bp_labels)):
+        for val in bp_feature_array[:, i]:
+            text = '%d' % val if i == 0 else '%.2f' % val
+            axs.annotate(text, color='.0', va='center',
+                          xy=(i+1, val/bp_array[:, i].mean()),
+                          xytext=(i+1.18, val/bp_array[:, i].mean()))
+    # Save figure
+    fig.tight_layout()
+    fig.savefig('./figures/boxplot_prop.png', dpi=300)
+    plt.close(fig)
