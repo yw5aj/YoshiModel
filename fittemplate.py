@@ -4,10 +4,10 @@ os.chdir('x:/WorkFolder/AbaqusFolder/YoshiModel/')
 
 import numpy as np
 from abqimport import *
-from setfiber import Fiber, getStimBlockFromCsv, materialBlockDefault
+from setfiber import Fiber, getStimBlockFromCsv
+from setfiber import materialBlockFiber as materialBlock
 
 
-materialBlock = materialBlockDefault
 stimBlock = getStimBlockFromCsv(CSVFILEPATH)
 fiber = Fiber(baseModelName=BASEMODELNAME, suffix='', stimBlock=stimBlock, materialBlock=materialBlock, runFiber=True, doAnalysis=False, skipWait=True)
 np.savetxt('./csvs/'+fiber.baseModelName+'StaticForceDispl.csv', np.column_stack((fiber.staticDisplList, fiber.staticForceList)), delimiter=',')
