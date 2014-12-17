@@ -3,7 +3,7 @@ from setmodel import *
 from commontools import *
 from readodb import *
 
-from feconstants stimBlockDefault, stimBlockDefaultForce, stimLineDefault, materialBlockDefault
+from constants import stimBlockDefault, stimBlockDefaultForce, stimLineDefault, materialBlockDefault
 
 def getStimBlockFromCsv(filePath):
     rampLiftTimeArray, holdDisplArray = np.genfromtxt(filePath, delimiter=',').T

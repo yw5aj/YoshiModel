@@ -5,7 +5,7 @@ os.chdir('x:/WorkFolder/AbaqusFolder/YoshiModel/')
 import numpy as np
 from abqimport import *
 from setfiber import Fiber, getStimBlockFromCsv
-from feconstants materialBlockFiber as materialBlock
+from constants import materialBlockFiber as materialBlock
 
 
 stimBlock = getStimBlockFromCsv(CSVFILEPATH)
