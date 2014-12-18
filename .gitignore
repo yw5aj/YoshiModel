@@ -4,6 +4,10 @@
 *.cae
 *.jnl
 *.log
+*.inp
+*.com
+*.ipm
+*.rec
 
 # Archive
 *archive
