@@ -17,4 +17,5 @@ materialBlockDefault = {'thicknessAll': [418.5, 338.8, 10.1348], 'skin_g_array':
 # Try a new skin to fit the transduction function
 skinThickArray, skinAlphaArray, sylgardThickArray, sylgardC10Array, g1Array, g2Array, ginfArray = np.genfromtxt('./csvs/simprop.csv', delimiter=',').T
 materialBlockFiber = copy.deepcopy(materialBlockDefault)
-materialBlockFiber['thicknessAll'][0] = skinThickArray[0]
+# materialBlockFiber['thicknessAll'][0] = skinThickArray[0]
+materialBlockFiber['thicknessAll'][0] = 225.33
