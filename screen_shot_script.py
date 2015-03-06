@@ -15,8 +15,10 @@ session.viewports['Viewport: 1'].view.setValues(nearPlane=0.0377807,
 session.viewports['Viewport: 1'].viewportAnnotationOptions.setValues(
     compass=OFF, title=OFF, state=OFF, annotations=OFF, legendBox=OFF,
     legendNumberFormat=FIXED)
+# session.viewports['Viewport: 1'].odbDisplay.contourOptions.setValues(
+    # contourStyle=CONTINUOUS, spectrum='Reversed rainbow')
 session.viewports['Viewport: 1'].odbDisplay.contourOptions.setValues(
-    contourStyle=CONTINUOUS, spectrum='Reversed rainbow')
+    contourStyle=CONTINUOUS, spectrum='Black to white')
 session.viewports['Viewport: 1'].odbDisplay.setPrimaryVariable(
     variableLabel='S', outputPosition=INTEGRATION_POINT, refinement=(INVARIANT, 
     'Min. Principal'), )
@@ -40,6 +42,9 @@ session.printOptions.setValues(reduceColors=False)
 session.printToFile(
     fileName='X:/WorkFolder/AbaqusFolder/YoshiModel/figures/screenshoot_zoomed_in', 
     format=PNG, canvasObjects=(session.viewports['Viewport: 1'], ))
+session.printToFile(
+    fileName='X:/WorkFolder/AbaqusFolder/YoshiModel/figures/screenshot_zoomed_in', 
+    format=EPS, canvasObjects=(session.viewports['Viewport: 1'], ))    
 
 #%% For understanding stress distribution
 from abaqus import *
