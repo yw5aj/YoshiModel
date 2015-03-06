@@ -6,7 +6,7 @@ from setfiber import *
 import copy
 
 skinThickArray, skinAlphaArray, sylgardThickArray, sylgardC10Array, g1Array, g2Array, ginfArray = np.genfromtxt('./csvs/simprop.csv', delimiter=',').T
-runFiber = True
+runFiber = False
 doAnalysis = True
 skipWait = True
 
@@ -68,3 +68,4 @@ from readodb import getSurfaceDistribution
 for fname in os.listdir('./odbs'):
     if fname.endswith('.odb') and fname.startswith('S'):
         getSurfaceDistribution(fname[:-4])
+

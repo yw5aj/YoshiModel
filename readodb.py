@@ -10,7 +10,12 @@ def getOutputs(jobName, save2csv=True):
     else:
         odb = session.openOdb('./odbs/'+jobName+'.odb', readOnly=True)
     rpNode = odb.rootAssembly.instances['TIP-1'].nodes[0]
-    mcncElemSet = odb.rootAssembly.instances['SKIN_SUBSTRATE-1'].elementSets['MCNC_EL']
+    # This is hard coded so that we do not have to re-run all models
+    # mcncElemSet contains two elements, center one on first and second row from the top
+    # 0th elem is the second row, 1st elem is the top row
+    mcncElemSetOld = odb.rootAssembly.instances['SKIN_SUBSTRATE-1'].elementSets['MCNC_EL']
+    mcncElemSet = odb.rootAssembly.instances['SKIN_SUBSTRATE-1'].ElementSet(name='MCNC', elements=mcncElemSetOld.elements[:1]) 
+    # End of the hard-coding
     time, force, displ, stress, strain, sener = [], [], [], [], [], []
     stepTime = [0]
     for step in odb.steps.values():
@@ -24,12 +29,9 @@ def getOutputs(jobName, save2csv=True):
             else:
                 force.append(-frame.fieldOutputs['RF'].getSubset(region=rpNode).values[0].data[1])
             displ.append(-frame.fieldOutputs['U'].getSubset(region=rpNode).values[0].data[1])
-            stress.append(-.5*frame.fieldOutputs['S'].getSubset(region=mcncElemSet).values[0].minPrincipal\
-                -.5*frame.fieldOutputs['S'].getSubset(region=mcncElemSet).values[1].minPrincipal)
-            strain.append(-.5*frame.fieldOutputs['LE'].getSubset(region=mcncElemSet).values[0].minPrincipal\
-                -.5*frame.fieldOutputs['LE'].getSubset(region=mcncElemSet).values[1].minPrincipal)    
-            sener.append(.5*frame.fieldOutputs['SENER'].getSubset(region=mcncElemSet).values[0].data\
-                +.5*frame.fieldOutputs['SENER'].getSubset(region=mcncElemSet).values[1].data)
+            stress.append(-np.mean([value.minPrincipal for value in frame.fieldOutputs['S'].getSubset(region=mcncElemSet).values]))
+            strain.append(-np.mean([value.minPrincipal for value in frame.fieldOutputs['LE'].getSubset(region=mcncElemSet).values]))
+            sener.append(np.mean([value.data for value in frame.fieldOutputs['SENER'].getSubset(region=mcncElemSet).values]))
     time = np.array(time)
     force = np.array(force)
     displ = np.array(displ)
@@ -69,10 +71,15 @@ def getSurfaceDistribution(jobName):
         stepTime.append(step.frames[-1].frameValue)
     stepTime = np.cumsum(stepTime)
     # Get all MCNC sets
-    mcncElemSet = odb.rootAssembly.instances['SKIN_SUBSTRATE-1'].elementSets['MCNC_EL']
+    # This is hard coded so that we do not have to re-run all models
+    # mcncElemSet contains two elements, center one on first and second row from the top
+    # 0th elem is the second row, 1st elem is the top row
+    mcncElemSetOld = odb.rootAssembly.instances['SKIN_SUBSTRATE-1'].elementSets['MCNC_EL']
+    mcncElemSet = odb.rootAssembly.instances['SKIN_SUBSTRATE-1'].ElementSet(name='MCNC', elements=mcncElemSetOld.elements[:1]) 
+    # End of the hard-coding
     def getNextMcncElemSet(mcncElemSet):
         elemLabelTuple = tuple([elem.label+1 for elem in mcncElemSet.elements])
-        setName = '%s%s'%elemLabelTuple
+        setName = ''.join(str(elemLabel) for elemLabel in elemLabelTuple)
         nextMcncElemSet = session.odbs.values()[0].rootAssembly.instances['SKIN_SUBSTRATE-1'].ElementSetFromElementLabels(name=setName, 
             elementLabels=elemLabelTuple)
         return nextMcncElemSet
@@ -119,12 +126,9 @@ def getSurfaceDistribution(jobName):
                     yU2 = np.mean(yU2List)
                     return xcoordOld, xcoordNew, yU2
                 xcoordOld, xcoordNew, yU2 = getXcoordFromMcncElemSet(mcncElemSet)
-                stress = -.5*frame.fieldOutputs['S'].getSubset(region=mcncElemSet).values[0].minPrincipal\
-                    -.5*frame.fieldOutputs['S'].getSubset(region=mcncElemSet).values[1].minPrincipal
-                strain = -.5*frame.fieldOutputs['LE'].getSubset(region=mcncElemSet).values[0].minPrincipal\
-                    -.5*frame.fieldOutputs['LE'].getSubset(region=mcncElemSet).values[1].minPrincipal
-                sener = .5*frame.fieldOutputs['SENER'].getSubset(region=mcncElemSet).values[0].data\
-                    +.5*frame.fieldOutputs['SENER'].getSubset(region=mcncElemSet).values[1].data
+                stress = -np.mean([value.minPrincipal for value in frame.fieldOutputs['S'].getSubset(region=mcncElemSet).values])
+                strain = -np.mean([value.minPrincipal for value in frame.fieldOutputs['LE'].getSubset(region=mcncElemSet).values])
+                sener = np.mean([value.data for value in frame.fieldOutputs['SENER'].getSubset(region=mcncElemSet).values])
                 return xcoordOld, xcoordNew, yU2, stress, strain, sener
             for mcncElemSet in mcncElemSetList:
                 xcoordOld, xcoordNew, yU2, stress, strain, sener = getMcncElemSetOutput(mcncElemSet)
