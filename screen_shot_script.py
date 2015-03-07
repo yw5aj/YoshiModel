@@ -15,20 +15,8 @@ session.viewports['Viewport: 1'].view.setValues(nearPlane=0.0377807,
 session.viewports['Viewport: 1'].viewportAnnotationOptions.setValues(
     compass=OFF, title=OFF, state=OFF, annotations=OFF, legendBox=OFF,
     legendNumberFormat=FIXED)
-# Setting contour and edge colors here
-color_list = []
-for i in range(16):
-    color_list.append('#%sFF' % (hex(15-i)[-1]*4))
-
-for i in range(15):
-    color_list.append('#0000%s' % (hex(14-i)[-1]*2))
-
-# session.Spectrum(name="Blue", colors = tuple(['#%sFF' % (hex(i)[-1]*4) for i in range(15)]))
-session.Spectrum(name="Blue", colors = tuple(color_list[::-1]))
 session.viewports['Viewport: 1'].odbDisplay.contourOptions.setValues(
-    contourStyle=CONTINUOUS, spectrum='Black to white')
-session.viewports['Viewport: 1'].odbDisplay.contourOptions.setValues(
-    edgeColorBandedQuilt='#000000') 
+    spectrum='Black to white', numIntervals=12)
 session.viewports['Viewport: 1'].odbDisplay.setPrimaryVariable(
     variableLabel='S', outputPosition=INTEGRATION_POINT, refinement=(INVARIANT, 
     'Min. Principal'), )
