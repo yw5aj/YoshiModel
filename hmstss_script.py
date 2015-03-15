@@ -29,10 +29,8 @@ stimBlockForce['rampLiftTimeArray'] = np.polyval(_displtimecoeff, eqdisp)
 
     
 # Simulations for the homeostasis analysis
-hmstssArray = np.linspace(147, 433, 10)
+hmstssArray = np.linspace(125, 433, 10)
 for (level, skinThick) in enumerate(hmstssArray):
-    if level < 5:
-        continue
     # Assign material properties
     materialBlock = copy.deepcopy(materialBlockDefault)
     materialBlock['thicknessAll'][0] = skinThick
