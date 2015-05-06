@@ -56,7 +56,7 @@ class Fiber:
         self.getStaticForceDispl()
         return
     
-    def openBaseCae(self, caeFile='base_model_0502'):
+    def openBaseCae(self, caeFile='base_model_20150506'):
         caeFilePath = './CaeFiles/' + caeFile + '.cae'
         openMdb(pathName=caeFilePath)
         return
