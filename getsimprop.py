@@ -35,7 +35,7 @@ if __name__ == '__main__':
         simprop[prop] = get_simprop(globals()[prop])
     # Manually adjust ginf and g1, g2
     real_ginf_min = simprop['ginf'][0]
-    simprop['ginf'][0] = .15
+    simprop['ginf'][0] = .1
     p = np.polyfit(ginf, g1, 1)
     simprop['g1'] = np.polyval(p, simprop['ginf'])
     simprop['g2'] = 1. - simprop['g1'] - simprop['ginf']
