@@ -82,7 +82,7 @@ def set_skin_property_qlv(modelName, g_array, tau_array, mu, alpha):
         testData=OFF, type=OGDEN, moduliTimeScale=INSTANTANEOUS, 
         volumetricResponse=VOLUMETRIC_DATA, table=((mu, alpha, 1./mu/10.), ))
     mdb.models[modelName].materials['skin'].Viscoelastic(domain=TIME, 
-        time=PRONY, table=((g_array[1], g_array[1], tau_array[1]), (g_array[2], g_array[2], tau_array[2]))) 
+        time=PRONY, table=((g_array[1], 0, tau_array[1]), (g_array[2], 0, tau_array[2]))) 
     return
 
 
@@ -91,6 +91,9 @@ def set_sylgard_property(modelName, g, tau, c10):
         c10, 1./2/c10), ))
     mdb.models[modelName].materials['sylgard'].viscoelastic.setValues(
         domain=TIME, time=PRONY, table=((g, g, tau), ))
+    # Remove Sylgard and Nylon viscoelasticity
+    del mdb.models[modelName].materials['sylgard'].viscoelastic
+    del mdb.models[modelName].materials['nylon'].viscoelastic
     return
 
 
