@@ -1,7 +1,6 @@
 # Abaqus temp files
 *.rpy*
 *.pyc
-*.cae
 *.jnl
 *.log
 *.inp

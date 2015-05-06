@@ -22,15 +22,15 @@ def runSimulation(baseModelName, materialBlock):
     
 skinThickArray, skinAlphaArray, sylgardThickArray, sylgardC10Array, g1Array, g2Array, ginfArray = np.genfromtxt(
     './csvs/simprop.csv', delimiter=',').T
-raThickG1Array, raThickG2Array, raThickGinfArray = np.genfromtxt('./csvs/rathickg.csv', delimiter=',')
+raThickG1Array, raThickG2Array, raThickGinfArray = np.genfromtxt('./csvs/rathickg.csv', delimiter=',').T
 
 
 # Simulations for the homeostasis analysis
 raThickArray = skinThickArray
-for (level, raThick, raThickG1, raThickG2, raThickGinf) in enumerate(zip(raThickArray, raThickG1Array, raThickG2Array, raThickGinfArray)):
+for level, (raThick, raThickG1, raThickG2, raThickGinf) in enumerate(zip(raThickArray, raThickG1Array, raThickG2Array, raThickGinfArray)):
     # Assign material properties
     materialBlock = copy.deepcopy(materialBlockDefault)
-    materialBlock['thicknessAll'][0] = skinThick
+    materialBlock['thicknessAll'][0] = raThick
     materialBlock['skin_g_array'] = [raThickGinf, raThickG2, raThickG1]
     runSimulation('RaThick%d'%level, materialBlock)
 
