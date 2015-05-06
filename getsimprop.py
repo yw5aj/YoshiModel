@@ -56,7 +56,7 @@ if __name__ == '__main__':
     bp_labels = [r'Thickness ($\mu$m)', 'Modulus', 'Viscoelasticity']
     bp_array = np.c_[thickness, alpha, ginf]
     bp = axs.boxplot(bp_array/bp_array.mean(axis=0), labels=bp_labels)
-    bp_feature_array = np.c_[simprop_array[:, 0], simprop_array[:, 1], 
+    bp_feature_array = np.c_[simprop_array[:, 0], simprop_array[:, 1],
                             simprop_array[:, 6]]
     bp_feature_array[0, 2] = real_ginf_min
 #    for line in bp.values():
@@ -73,3 +73,11 @@ if __name__ == '__main__':
     fig.tight_layout()
     fig.savefig('./figures/boxplot_prop.png', dpi=300)
     plt.close(fig)
+    # %% Design data for the relax adapt analysis
+    p_ginf = np.polyfit(thickness, ginf, 1)
+    p_g1 = np.polyfit(thickness, g1, 1)
+    rathick_ginf = np.polyval(p_ginf, simprop['thickness'])
+    rathick_g1 = np.polyval(p_g1, simprop['thickness'])
+    rathick_g2 = 1 - rathick_ginf - rathick_g1
+    np.savetxt('./csvs/rathickg.csv', np.c_[
+        rathick_g1, rathick_g2, rathick_ginf], delimiter=',')
