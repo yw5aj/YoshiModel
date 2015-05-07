@@ -31,9 +31,10 @@ stimBlockForce['rampLiftTimeArray'] = np.polyval(_displtimecoeff, eqdisp)
 skinThickArray, skinAlphaArray, sylgardThickArray, sylgardC10Array, g1Array, g2Array, ginfArray = np.genfromtxt(
     './csvs/simprop.csv', delimiter=',').T
 raThickG1Array, raThickG2Array, raThickGinfArray = np.genfromtxt('./csvs/rathickg.csv', delimiter=',').T
+raIndG1Array, raIndG2Array, raIndGinfArray = np.genfromtxt('./csvs/raindg.csv', delimiter=',').T
 
 
-# Simulations for the homeostasis analysis
+# Simulations for relax-adapt only thickness change cases
 raThickArray = skinThickArray
 for level, (raThick, raThickG1, raThickG2, raThickGinf) in enumerate(zip(raThickArray, raThickG1Array, raThickG2Array, raThickGinfArray)):
     # Assign material properties
@@ -41,6 +42,14 @@ for level, (raThick, raThickG1, raThickG2, raThickGinf) in enumerate(zip(raThick
     materialBlock['thicknessAll'][0] = raThick
     materialBlock['skin_g_array'] = [raThickGinf, raThickG2, raThickG1]
     runSimulation('RaThick%d'%level, materialBlock, stimBlockForce)
+
+
+# Simulations for relax-adapt only consider individual differences
+for level, (raIndG1, raIndG2, raIndGinf) in enumerate(zip(raIndG1Array, raIndG2Array, raIndGinfArray)):
+    # Assign material properties
+    materialBlock = copy.deepcopy(materialBlockDefault)
+    materialBlock['skin_g_array'] = [raIndGinf, raIndG2, raIndG1]
+    runSimulation('RaInd%d'%level, materialBlock, stimBlockForce)
 
 
 # Get distribution csvs
