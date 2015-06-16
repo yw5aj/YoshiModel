@@ -5,8 +5,8 @@ from abqimport import *
 from setfiber import *
 import copy
 
-runFiberDispl = False
-doAnalysisDispl = False
+runFiberDispl = True
+doAnalysisDispl = True
 runFiberForce = True
 doAnalysisForce = True
 skipWait = True

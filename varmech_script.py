@@ -34,6 +34,18 @@ for (level, skinAlpha) in enumerate(skinAlphaArray):
     materialBlock['skin_alpha'] = skinAlpha
     runSimulation('SkinAlpha%d'%level, materialBlock)
 
+
+# Vary skin viscoelasticity
+for (level, ginf) in enumerate(ginfArray):
+    # Get g1, g2, ginf
+    g1 = g1Array[level]
+    g2 = g2Array[level]
+    # Assign material properties
+    materialBlock = copy.deepcopy(materialBlockDefault)
+    materialBlock['skin_g_array'] = [ginf, g2, g1]
+    runSimulation('SkinGinf%d'%level, materialBlock)
+
+
 # Vary sylgard thickness
 for (level, sylgardThick) in enumerate(sylgardThickArray):
     # if level < 4:
@@ -52,19 +64,9 @@ for (level, sylgardC10) in enumerate(sylgardC10Array):
     runSimulation('SylgardC10%d'%level, materialBlock)
 
 
-# Vary skin viscoelasticity
-for (level, ginf) in enumerate(ginfArray):
-    # Get g1, g2, ginf
-    g1 = g1Array[level]
-    g2 = g2Array[level]
-    # Assign material properties
-    materialBlock = copy.deepcopy(materialBlockDefault)
-    materialBlock['skin_g_array'] = [ginf, g2, g1]
-    runSimulation('SkinGinf%d'%level, materialBlock)
-
-
 # Get distribution csvs
 from readodb import getSurfaceDistribution
 for fname in os.listdir('./odbs'):
     if fname.endswith('.odb') and fname.startswith('S'):
         getSurfaceDistribution(fname[:-4])
+
