@@ -40,6 +40,10 @@ if __name__ == '__main__':
     real_ginf_min = simprop['ginf'][0]
     simprop['ginf'][0] = .1
     p = np.polyfit(ginf, g1, 1)
+    # Calculate p-value for this regression
+    from scipy.stats import linregress
+    res = linregress(ginf, g1)
+    # Done for the p-value
     simprop['g1'] = np.polyval(p, simprop['ginf'])
     simprop['g2'] = 1. - simprop['g1'] - simprop['ginf']
     # Add sylgard elasticity and thickness
