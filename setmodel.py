@@ -149,6 +149,16 @@ def setRampCurve(modelName, rampLiftTime, a=a_ramp_curve):
     return    
 
 
+def setSineRamp(modelName, freq, amp, dur, pts_per_period=20):
+    omega = 2 * np.pi / freq
+    period = 1. / freq
+    dt = period / pts_per_period
+    time = np.r_[0:dur:dt]
+    displ = amp * np.sin(omega * time)
+    
+    return
+
+
 def copyToForce(displModelName, rampLiftTime, holdForce):
     modelName = displModelName.replace('Displ', 'Force')
     mdb.Model(modelName, objectToCopy=mdb.models[displModelName])
@@ -166,3 +176,4 @@ def copyToForce(displModelName, rampLiftTime, holdForce):
     setAllStepTimes(modelName, rampLiftTime)
     setRampCurve(modelName, rampLiftTime)
     return modelName
+

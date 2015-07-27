@@ -9,8 +9,8 @@ from feconstants import materialBlockFiber as materialBlock
 
 
 # %% For Yoshi's experiment
-stimBlock = getStimBlockFromCsv('x:/WorkFolder/DataAnalysis/YoshiRecordingData/csvs/stim_block_2.csv')
 # The fast one
+stimBlock = getStimBlockFromCsv('x:/WorkFolder/DataAnalysis/YoshiRecordingData/csvs/stim_block_2.csv')
 fiber = Fiber(baseModelName='LindsayFiberFast', suffix='', stimBlock=stimBlock, materialBlock=materialBlock, runFiber=True, doAnalysis=False, skipWait=True)
 np.savetxt('./csvs/'+fiber.baseModelName+'StaticForceDispl.csv', np.column_stack((fiber.staticDisplList, fiber.staticForceList)), delimiter=',')
 for i, model in enumerate(fiber.modelList):
@@ -23,6 +23,14 @@ np.savetxt('./csvs/'+fiber.baseModelName+'StaticForceDispl.csv', np.column_stack
 for i, model in enumerate(fiber.modelList):
     output = np.c_[model.time, model.force, model.displ, model.stress, model.strain, model.sener]
     np.savetxt('./csvs/'+fiber.baseModelName+'Output'+str(i)+'.csv', output, delimiter=',')
+# The sinusoidal run
+stimBlock = getStimBlockFromCsv('x:/WorkFolder/DataAnalysis/YoshiRecordingData/csvs/stim_block_2.csv')
+fiber = Fiber(baseModelName='LindsayFiberFast', suffix='', stimBlock=stimBlock, materialBlock=materialBlock, runFiber=False, doAnalysis=False, skipWait=True)
+np.savetxt('./csvs/'+fiber.baseModelName+'StaticForceDispl.csv', np.column_stack((fiber.staticDisplList, fiber.staticForceList)), delimiter=',')
+for i, model in enumerate(fiber.modelList):
+    output = np.c_[model.time, model.force, model.displ, model.stress, model.strain, model.sener]
+    np.savetxt('./csvs/'+fiber.baseModelName+'Output'+str(i)+'.csv', output, delimiter=',')
+
 
 
 # %% For the simulations
