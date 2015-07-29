@@ -152,3 +152,68 @@ def getSurfaceDistribution(jobName):
     np.savetxt('./csvs/%s_msener.csv'%jobName, senerList, delimiter=',')
     np.savetxt('./csvs/%s_my.csv'%jobName, yDisplList, delimiter=',')
     return
+    
+
+def getAllStresses(jobName):
+    """
+    This is a quick-and-dirty function that reads out all stress quantities to compare between them, so we can address the concerns from
+    Reivewer #1, Question #3.
+    """
+    # Open the odb file
+    if os.path.exists('./'+jobName+'.odb'):
+        odb = session.openOdb('./'+jobName+'.odb', readOnly=True)
+    else:
+        odb = session.openOdb('./odbs/'+jobName+'.odb', readOnly=True)
+    # Get duration of each step
+    stepTime = [0]
+    for step in odb.steps.values():
+        stepTime.append(step.frames[-1].frameValue)
+    stepTime = np.cumsum(stepTime)
+    # Get all MCNC sets
+    # This is hard coded so that we do not have to re-run all models
+    # mcncElemSet contains two elements, center one on first and second row from the top
+    # 0th elem is the second row, 1st elem is the top row
+    mcncElemSetOld = odb.rootAssembly.instances['SKIN_SUBSTRATE-1'].elementSets['MCNC_EL']
+    mcncElemSet = odb.rootAssembly.instances['SKIN_SUBSTRATE-1'].ElementSet(name='MCNC', elements=mcncElemSetOld.elements[:1]) 
+    # End of the hard-coding
+    def getNextMcncElemSet(mcncElemSet):
+        elemLabelTuple = tuple([elem.label+1 for elem in mcncElemSet.elements])
+        setName = ''.join(str(elemLabel) for elemLabel in elemLabelTuple)
+        nextMcncElemSet = session.odbs.values()[0].rootAssembly.instances['SKIN_SUBSTRATE-1'].ElementSetFromElementLabels(name=setName, 
+            elementLabels=elemLabelTuple)
+        return nextMcncElemSet
+    mcncElemSetList = [mcncElemSet]
+    cnode_no = len(odb.steps.values()[0].frames[0].fieldOutputs['CPRESS   ASSEMBLY_S_SURF-3/ASSEMBLY_TIP-1_RIGIDSURFACE_'].values)
+    celem_no = cnode_no - 1
+    for i in range(celem_no-1):
+        mcncElemSetList.append(getNextMcncElemSet(mcncElemSetList[-1]))
+    # Initialize empty lists
+    time = []
+    sMinPrinList, sMidPrinList, sMaxPrinList, sMisesList= [], [], [], []
+    # Iterate through frames to get data
+    for i, step in enumerate(odb.steps.values()):
+        for frame in step.frames:
+            # Get MCNC data
+            sMinPrinList.append([])
+            sMidPrinList.append([])
+            sMaxPrinList.append([])
+            sMisesList.append([])
+            def getMcncElemSetOutput(mcncElemSet):
+                sMinPrin = np.mean([value.minPrincipal for value in frame.fieldOutputs['S'].getSubset(region=mcncElemSet).values])
+                sMidPrin = np.mean([value.midPrincipal for value in frame.fieldOutputs['S'].getSubset(region=mcncElemSet).values])
+                sMaxPrin = np.mean([value.maxPrincipal for value in frame.fieldOutputs['S'].getSubset(region=mcncElemSet).values])
+                sMises = np.mean([value.mises for value in frame.fieldOutputs['S'].getSubset(region=mcncElemSet).values])
+                return sMinPrin, sMidPrin, sMaxPrin, sMises
+            for mcncElemSet in mcncElemSetList:
+                sMinPrin, sMidPrin, sMaxPrin, sMises = getMcncElemSetOutput(mcncElemSet)
+                sMinPrinList[-1].append(sMinPrin)
+                sMidPrinList[-1].append(sMidPrin)
+                sMaxPrinList[-1].append(sMaxPrin)
+                sMisesList[-1].append(sMises)
+    odb.close()
+    # Save data to csv
+    np.savetxt('./csvs/%s_msminprin.csv'%jobName, sMinPrinList, delimiter=',')
+    np.savetxt('./csvs/%s_msmidprin.csv'%jobName, sMidPrinList, delimiter=',')
+    np.savetxt('./csvs/%s_msmaxprin.csv'%jobName, sMaxPrinList, delimiter=',')
+    np.savetxt('./csvs/%s_msmises.csv'%jobName, sMisesList, delimiter=',')
+    return
