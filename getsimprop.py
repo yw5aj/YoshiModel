@@ -97,3 +97,68 @@ if __name__ == '__main__':
     raind_g2 = 1 - raind_ginf - raind_g1
     np.savetxt('./csvs/raindg.csv', np.c_[
         raind_g1, raind_g2, raind_ginf], delimiter=',')
+    # %% Do representative sampling
+
+    def random_sample(population_data, sample_num):
+        sample_data = population_data[np.random.randint(
+            population_data.shape[0], size=sample_num)]
+        return sample_data
+
+    def get_covres(population_cov, sample_cov):
+        covres = ((population_cov - sample_cov)**2).sum()
+        return covres
+
+    def represent_sample(population_data, sample_num, iter_num):
+        population_cov = np.cov(population_data, rowvar=0)
+        sample_data_list, covres_list = [], []
+        for i in range(iter_num):
+            sample_data = random_sample(population_data, sample_num)
+            sample_cov = np.cov(sample_data, rowvar=0)
+            covres = get_covres(population_cov, sample_cov)
+            sample_data_list.append(sample_data)
+            covres_list.append(covres)
+        minind = np.argmin(covres_list)
+        return sample_data_list[minind], covres_list[minind]
+    population_data = my_data = np.c_[tau1, tau2, g1, g2, ginf, mu, alpha,
+                                      thickness]
+    population_cov = np.cov(population_data, rowvar=0)
+    sample_num = 10
+    rescov_list = []
+    for i in range(1, 7):
+        iter_num = 10 ** i
+        rescov_list.append(represent_sample(population_data,
+                                            sample_num, iter_num)[1])
+    plt.plot(rescov_list)
+    # %% A step-wise way to draw samples
+    from sklearn.preprocessing import scale
+    norm_population_data = scale(population_data)
+    old_sample_ind = np.array([])
+
+    def add_sample(norm_population_data, old_sample_ind):
+        if len(old_sample_ind) == 0:
+            new_sample_ind = np.array([((
+                norm_population_data - norm_population_data.mean(
+                    axis=0))**2).sum(axis=1).argmin()])
+            return new_sample_ind
+        else:
+            covres_array = np.zeros((norm_population_data.shape[0]))
+            for new_ind in range(norm_population_data.shape[0]):
+                if new_ind in old_sample_ind:
+                    covres_array[new_ind] = np.inf
+                else:
+                    new_sample_ind = np.r_[old_sample_ind, new_ind]
+                    covres_array[new_ind] = calculate_covres(
+                        norm_population_data, new_sample_ind)
+            new_ind = covres_array.argmin()
+            new_sample_ind = np.r_[old_sample_ind, new_ind]
+            return new_sample_ind
+
+    def calculate_covres(population_data, sample_ind):
+        sample_data = population_data[sample_ind, :]
+        population_cov = np.cov(population_data, rowvar=0)
+        sample_cov = np.cov(sample_data, rowvar=0)
+        covres = ((population_cov - sample_cov)**2).sum()
+        return covres
+
+    for i in range(8):
+        old_sample_ind = add_sample(norm_population_data, old_sample_ind)
