@@ -10,9 +10,9 @@ def getStimBlockFromCsv(filePath):
     stimBlock = {'rampLiftTimeArray': rampLiftTimeArray, 'holdDisplArray': holdDisplArray}
     return stimBlock
 
-    
+
 class Fiber:
-    
+
     def __init__(self, baseModelName='temp', suffix='Displ', stimBlock=stimBlockDefault, materialBlock=materialBlockDefault, skipWait=False, runFiber=True, doAnalysis=False):
         self.finishFlag = False
         for key, value in stimBlock.items():
@@ -34,7 +34,7 @@ class Fiber:
             self.doAnalysis()
         self.finishFlag = True
         return
-    
+
     def runFiber(self, skipWait=False):
         for model in self.modelList:
             model.runModel()
@@ -55,22 +55,22 @@ class Fiber:
             model.extractOutputs()
         self.getStaticForceDispl()
         return
-    
+
     def openBaseCae(self, caeFile='base_model_20150506'):
         caeFilePath = './CaeFiles/' + caeFile + '.cae'
         openMdb(pathName=caeFilePath)
         return
-    
+
     def getStaticForceDispl(self):
         self.timeList = [model.time for model in self.modelList]
         self.forceList = [model.force for model in self.modelList]
         self.displList = [model.displ for model in self.modelList]
         self.staticForceList, self.staticDisplList = getStaticForceDispl(self.timeList, self.forceList, self.displList)
         return
-    
+
 
 class Model:
-    
+
     def __init__(self, modelName, stimLine=stimLineDefault, materialBlock=materialBlockDefault):
         for key, value in stimLine.items():
             setattr(self, key, value)
@@ -79,56 +79,57 @@ class Model:
         self.modelName = modelName
         self.setUpModel()
         return
-    
+
     def setUpModel(self):
         self.copyModel()
+        setCylinderRadius(self.modelName, self.cylinderRadius)
         setThickness(self.modelName, *self.thicknessAll)
         self.setMaterialProperties()
-        setAllStepTimes(self.modelName, self.rampLiftTime) 
+        setAllStepTimes(self.modelName, self.rampLiftTime)
         setRampCurve(self.modelName, self.rampLiftTime)
         setHoldDispl(self.modelName, self.holdDispl)
         deleteLiftStep(self.modelName) # Skipping this to save model execution time - not using it now anyway
         return
-    
+
     def setMaterialProperties(self):
         set_skin_property_qlv(self.modelName, self.skin_g_array, self.skin_tau_array, self.skin_mu, self.skin_alpha)
         set_sylgard_property(self.modelName, self.sylgard_g, self.sylgard_tau, self.sylgard_c10)
         return
-            
+
     def copyModel(self):
         mdb.Model(name=self.modelName, objectToCopy=mdb.models['base_model'])
         return
-    
+
     def runModel(self):
         if self.modelName not in mdb.jobs:
-            mdb.Job(name=self.modelName, model=self.modelName, description='', 
-                type=ANALYSIS, atTime=None, waitMinutes=0, waitHours=0, queue=None, 
-                memory=90, memoryUnits=PERCENTAGE, getMemoryFromAnalysis=True, 
-                explicitPrecision=SINGLE, nodalOutputPrecision=SINGLE, echoPrint=OFF, 
-                modelPrint=OFF, contactPrint=OFF, historyPrint=OFF, userSubroutine='', 
+            mdb.Job(name=self.modelName, model=self.modelName, description='',
+                type=ANALYSIS, atTime=None, waitMinutes=0, waitHours=0, queue=None,
+                memory=90, memoryUnits=PERCENTAGE, getMemoryFromAnalysis=True,
+                explicitPrecision=SINGLE, nodalOutputPrecision=SINGLE, echoPrint=OFF,
+                modelPrint=OFF, contactPrint=OFF, historyPrint=OFF, userSubroutine='',
                 scratch='', multiprocessingMode=DEFAULT, numCpus=1, numGPUs=0)
         mdb.jobs[self.modelName].submit(consistencyChecking=OFF)
         return
-    
+
     def waitForCompletion(self):
         mdb.jobs[self.modelName].waitForCompletion()
         return
-        
+
     def extractOutputs(self):
         self.time, self.force, self.displ, self.stress, self.strain, self.sener = getOutputs(self.modelName)
         return
-    
+
     def transferOdb(self):
         transferOdb(self.modelName)
         return
-    
+
     def deleteJob(self):
         deleteJob(self.modelName)
         return
 
 
 class FiberForce(Fiber):
-    
+
     def __init__(self, displFiber, stimBlock=stimBlockDefaultForce, skipWait=False, runFiber=True, doAnalysis=False):
         self.finishFlag = False
         self.modelList = []
@@ -143,11 +144,10 @@ class FiberForce(Fiber):
             self.doAnalysis()
         self.finishFlag = True
         return
-    
+
 
 
 class ModelForce(Model):
-    
+
     def __init__(self, displModel, rampLiftTime, holdForce):
         self.modelName = copyToForce(displModel.modelName, rampLiftTime, holdForce)
-        

@@ -6,6 +6,36 @@ a1_ramp_time_map = 5.51e-4
 a0_ramp_time_map = 0.138
 
 
+def setCylinderRadius(modelName, cylinderRadius=.5):
+    """
+    Set the radius of the cylintrical indenter tip. Radius unit in mm.
+    """
+    # Convert to SI units
+    radius = cylinderRadius * 1e-3
+    fillet = radius / 10
+    # Change geometry
+    p = mdb.models[modelName].parts['tip']
+    s = p.features['2D Analytic rigid shell-1'].sketch
+    mdb.models[modelName].ConstrainedSketch(name='__edit__', objectToCopy=s)
+    s1 = mdb.models[modelName].sketches['__edit__']
+    g, v, d, c = s1.geometry, s1.vertices, s1.dimensions, s1.constraints
+    s1.setPrimaryObject(option=SUPERIMPOSE)
+    p.projectReferencesOntoSketch(sketch=s1,
+        upToFeature=p.features['2D Analytic rigid shell-1'], filter=COPLANAR_EDGES)
+    s1.CoincidentConstraint(entity1=g[2], entity2=v[1])
+    d[1].setValues(value=radius, )
+    d[0].setValues(value=fillet, )
+    s1.unsetPrimaryObject()
+    p = mdb.models[modelName].parts['tip']
+    p.features['2D Analytic rigid shell-1'].setValues(sketch=s1)
+    del mdb.models[modelName].sketches['__edit__']
+    p = mdb.models[modelName].parts['tip']
+    p.regenerate()
+    a = mdb.models[modelName].rootAssembly
+    a.regenerate()
+    return
+
+
 def setThickness(modelName, skin=418.5, nylon=338.8, sylgard=10.1348):
     """
     Set the thickness of each layer. Note the units: skin & nylon in microns and sylgard in mm.
@@ -24,7 +54,7 @@ def setThickness(modelName, skin=418.5, nylon=338.8, sylgard=10.1348):
     s1 = mdb.models[modelName].sketches['__edit__']
     g, v, d, c = s1.geometry, s1.vertices, s1.dimensions, s1.constraints
     s1.setPrimaryObject(option=SUPERIMPOSE)
-    p.projectReferencesOntoSketch(sketch=s1, 
+    p.projectReferencesOntoSketch(sketch=s1,
         upToFeature=p.features['Shell planar-1'], filter=COPLANAR_EDGES)
     d[0].setValues(value=all_layers, )
     s1.unsetPrimaryObject()
@@ -40,7 +70,7 @@ def setThickness(modelName, skin=418.5, nylon=338.8, sylgard=10.1348):
     s2 = mdb.models[modelName].sketches['__edit__']
     g, v, d, c = s2.geometry, s2.vertices, s2.dimensions, s2.constraints
     s2.setPrimaryObject(option=SUPERIMPOSE)
-    p.projectReferencesOntoSketch(sketch=s2, 
+    p.projectReferencesOntoSketch(sketch=s2,
         upToFeature=p.features['Partition face-1'], filter=COPLANAR_EDGES)
     d[1].setValues(value=sylgard_m, )
     d[2].setValues(value=nylon_m, )
@@ -55,7 +85,7 @@ def setThickness(modelName, skin=418.5, nylon=338.8, sylgard=10.1348):
     # Translate the assembly to make surface at origin
     currentY = model.rootAssembly.instances['tip-1'].vertices[4].pointOn[0][1]
     a = mdb.models[modelName].rootAssembly
-    a.translate(instanceList=('skin_substrate-1', 'tip-1'), vector=(0.0, -currentY, 
+    a.translate(instanceList=('skin_substrate-1', 'tip-1'), vector=(0.0, -currentY,
         0.0))
     # Select the MCNC nodes and elements
     elements = model.rootAssembly.instances['skin_substrate-1'].elements.getByBoundingBox(xMax=9e-6, yMin=-40e-6)
@@ -78,11 +108,11 @@ def set_skin_property_qlv(modelName, g_array, tau_array, mu, alpha):
     model.keywordBlock.setValues(edited=False)
     model.keywordBlock.synchVersions()
     # Set the QLV model
-    mdb.models[modelName].materials['skin'].Hyperelastic(materialType=ISOTROPIC, 
-        testData=OFF, type=OGDEN, moduliTimeScale=INSTANTANEOUS, 
+    mdb.models[modelName].materials['skin'].Hyperelastic(materialType=ISOTROPIC,
+        testData=OFF, type=OGDEN, moduliTimeScale=INSTANTANEOUS,
         volumetricResponse=VOLUMETRIC_DATA, table=((mu, alpha, 1./mu/10.), ))
-    mdb.models[modelName].materials['skin'].Viscoelastic(domain=TIME, 
-        time=PRONY, table=((g_array[1], 0, tau_array[1]), (g_array[2], 0, tau_array[2]))) 
+    mdb.models[modelName].materials['skin'].Viscoelastic(domain=TIME,
+        time=PRONY, table=((g_array[1], 0, tau_array[1]), (g_array[2], 0, tau_array[2])))
     return
 
 
@@ -132,10 +162,10 @@ def setRampCurve(modelName, rampLiftTime, a=a_ramp_curve):
     liftCurve = np.column_stack((xdata_scaled, ydata[::-1]))
     rampCurve = tuple(map(tuple, rampCurve))
     liftCurve = tuple(map(tuple, liftCurve))
-    mdb.models[modelName].TabularAmplitude(name='RampCurve', timeSpan=STEP, 
+    mdb.models[modelName].TabularAmplitude(name='RampCurve', timeSpan=STEP,
         smooth=SOLVER_DEFAULT, data=rampCurve)
-    mdb.models[modelName].TabularAmplitude(name='LiftCurve', timeSpan=STEP, 
-        smooth=SOLVER_DEFAULT, data=liftCurve)        
+    mdb.models[modelName].TabularAmplitude(name='LiftCurve', timeSpan=STEP,
+        smooth=SOLVER_DEFAULT, data=liftCurve)
     if 'Displ' in modelName:
         mdb.models[modelName].boundaryConditions['movingIndenter'].setValues(
             amplitude='RampCurve')
@@ -144,9 +174,9 @@ def setRampCurve(modelName, rampLiftTime, a=a_ramp_curve):
     elif 'Force' in modelName:
         mdb.models[modelName].loads['forceLoad'].setValues(amplitude='RampCurve')
         if 'lift' in mdb.models[modelName].steps.keys():
-            mdb.models[modelName].loads['forceLoad'].setValuesInStep(stepName='lift', 
+            mdb.models[modelName].loads['forceLoad'].setValuesInStep(stepName='lift',
                 amplitude='LiftCurve')
-    return    
+    return
 
 
 def setSineRamp(modelName, freq, amp, dur, pts_per_period=20):
@@ -155,7 +185,7 @@ def setSineRamp(modelName, freq, amp, dur, pts_per_period=20):
     dt = period / pts_per_period
     time = np.r_[0:dur:dt]
     displ = amp * np.sin(omega * time)
-    
+
     return
 
 
@@ -169,11 +199,10 @@ def copyToForce(displModelName, rampLiftTime, holdForce):
     r1 = a.instances['tip-1'].referencePoints
     refPoints1=(r1[2], )
     region = a.Set(referencePoints=refPoints1, name='Set-7')
-    mdb.models[modelName].ConcentratedForce(name='forceLoad', 
-        createStepName='ramp', region=region, cf2=-holdForce, amplitude='RampCurve', 
+    mdb.models[modelName].ConcentratedForce(name='forceLoad',
+        createStepName='ramp', region=region, cf2=-holdForce, amplitude='RampCurve',
         distributionType=UNIFORM, field='', localCsys=None)
     # Update step time and ramp curve
     setAllStepTimes(modelName, rampLiftTime)
     setRampCurve(modelName, rampLiftTime)
     return modelName
-

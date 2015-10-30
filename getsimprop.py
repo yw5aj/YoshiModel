@@ -30,6 +30,7 @@ if __name__ == '__main__':
         'ViscoAnalysis052013/strain_level_2py.mat')
     tau1, tau2, g1, g2, ginf, mu, alpha, r2, stretch, thickness, skin_id,\
         ramp_time = data['qlv2tFixPara'].T
+    skin_id = skin_id.astype('i')
     thickness *= 1e3
     # Creat the thicknesses and the alphas
     simprop = {}
@@ -97,42 +98,28 @@ if __name__ == '__main__':
     raind_g2 = 1 - raind_ginf - raind_g1
     np.savetxt('./csvs/raindg.csv', np.c_[
         raind_g1, raind_g2, raind_ginf], delimiter=',')
-    # %% Do representative sampling
-
-    def random_sample(population_data, sample_num):
-        sample_data = population_data[np.random.randint(
-            population_data.shape[0], size=sample_num)]
-        return sample_data
-
-    def get_covres(population_cov, sample_cov):
-        covres = ((population_cov - sample_cov)**2).sum()
-        return covres
-
-    def represent_sample(population_data, sample_num, iter_num):
-        population_cov = np.cov(population_data, rowvar=0)
-        sample_data_list, covres_list = [], []
-        for i in range(iter_num):
-            sample_data = random_sample(population_data, sample_num)
-            sample_cov = np.cov(sample_data, rowvar=0)
-            covres = get_covres(population_cov, sample_cov)
-            sample_data_list.append(sample_data)
-            covres_list.append(covres)
-        minind = np.argmin(covres_list)
-        return sample_data_list[minind], covres_list[minind]
-    population_data = my_data = np.c_[tau1, tau2, g1, g2, ginf, mu, alpha,
-                                      thickness]
-    population_cov = np.cov(population_data, rowvar=0)
-    sample_num = 10
-    rescov_list = []
-    for i in range(1, 7):
-        iter_num = 10 ** i
-        rescov_list.append(represent_sample(population_data,
-                                            sample_num, iter_num)[1])
-    plt.plot(rescov_list)
     # %% A step-wise way to draw samples
+    dataset = '2013'
+    if dataset == '2013':
+        population_data = np.c_[tau1, tau2, g1, g2, ginf, mu, alpha, thickness]
+        skin_id_arr = np.unique(skin_id)
+        unique_skin_ind = []
+        for i in skin_id_arr:
+            unique_skin_ind.append(
+                np.median(np.nonzero(skin_id == i)[0]).astype('i'))
+        population_data = population_data[unique_skin_ind, :]
+    elif dataset == '2011':
+        xlsx_df = pd.read_excel(
+            'X:/WorkFolder/WorkArchive/DocumentFolder201507/分析/201404/' +
+            'ViscoAnalysis0411.xlsm', sheetname='SummerFast',
+            index_col=None, header=None)
+        qlv_params = xlsx_df.iloc[5:49, 25:32].values.astype('f')
+        thickness = xlsx_df.iloc[5:49, 10].values.astype('f')
+        age = xlsx_df.iloc[5:49, 5]
+        population_data = np.c_[qlv_params, thickness]
     from sklearn.preprocessing import scale
     norm_population_data = scale(population_data)
-    old_sample_ind = np.array([])
+    sample_ind = np.array([])
 
     def add_sample(norm_population_data, old_sample_ind):
         if len(old_sample_ind) == 0:
@@ -159,6 +146,21 @@ if __name__ == '__main__':
         sample_cov = np.cov(sample_data, rowvar=0)
         covres = ((population_cov - sample_cov)**2).sum()
         return covres
-
-    for i in range(8):
-        old_sample_ind = add_sample(norm_population_data, old_sample_ind)
+    # Make the convergence plot
+    covtot = (np.cov(norm_population_data, rowvar=0)**2).sum()
+    covres_list = [covtot]
+    for i in range(41):
+        sample_ind = add_sample(norm_population_data, sample_ind)
+        covres_list.append(calculate_covres(norm_population_data, sample_ind))
+    rel_err = np.array(covres_list) / covtot
+    fig, axs = plt.subplots()
+    axs.plot(100 * (1 - rel_err), '-k')
+    axs.set_title('Population N = 41')
+    axs.set_xlabel('# of samples')
+    axs.set_ylabel('% of covariance matrix')
+    axs.grid()
+    fig.tight_layout()
+    fig.savefig('./figures/cov_converge.png', dpi=300)
+    # Get actual data
+    sample_data = population_data[sample_ind[:5], :]
+    np.savetxt('./csvs/repsample.csv', sample_data, delimiter=',')
