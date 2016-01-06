@@ -162,5 +162,5 @@ if __name__ == '__main__':
     fig.tight_layout()
     fig.savefig('./figures/cov_converge.png', dpi=300)
     # Get actual data
-    sample_data = population_data[sample_ind[:5], :]
+    sample_data = population_data[sample_ind[:10], :]
     np.savetxt('./csvs/repsample.csv', sample_data, delimiter=',')
