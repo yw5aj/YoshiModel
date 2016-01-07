@@ -1,14 +1,16 @@
 import numpy as np
 import copy
+
+
 # Set default stim block for displ
-_displtimecoeff = np.loadtxt('./csvs/displtimecoeff.csv', delimiter=',')
+displtimecoeff = np.loadtxt('./csvs/displtimecoeff.csv', delimiter=',')
 stimBlockDefault = {'holdDisplArray': np.r_[.032:.16:5j]}
-stimBlockDefault['rampLiftTimeArray'] = np.polyval(_displtimecoeff, stimBlockDefault['holdDisplArray'])
+stimBlockDefault['rampLiftTimeArray'] = np.polyval(displtimecoeff, stimBlockDefault['holdDisplArray'])
 # Set default stim block for force
 stimBlockDefaultForce = {'holdForceArray': np.r_[1.2e-3:6e-3:5j]}
-_displforce = np.loadtxt('./csvs/FitFemDisplforce.csv', delimiter=',')
-eqdisp = np.interp(stimBlockDefaultForce['holdForceArray'], _displforce[:, 1], _displforce[:, 0]*1e3)
-stimBlockDefaultForce['rampLiftTimeArray'] = np.polyval(_displtimecoeff, eqdisp)
+displforce = np.loadtxt('./csvs/FitFemDisplforce.csv', delimiter=',')
+eqdisp = np.interp(stimBlockDefaultForce['holdForceArray'], displforce[:, 1], displforce[:, 0]*1e3)
+stimBlockDefaultForce['rampLiftTimeArray'] = np.polyval(displtimecoeff, eqdisp)
 # Set stim line and material
 stimLineDefault = {'rampLiftTime': .4, 'holdDispl': .2*1e-3}
 materialBlockDefault = {'thicknessAll': [418.5, 338.8, 10.1348], 'skin_g_array': [0.351, 0.154, 0.495],
@@ -19,3 +21,4 @@ skinThickArray, skinAlphaArray, sylgardThickArray, sylgardC10Array, g1Array, g2A
 materialBlockFiber = copy.deepcopy(materialBlockDefault)
 # materialBlockFiber['thicknessAll'][0] = skinThickArray[0]
 materialBlockFiber['thicknessAll'][0] = 225.33
+

@@ -2,13 +2,37 @@ from abqimport import *
 from setmodel import *
 from commontools import *
 from readodb import *
-
-from feconstants import stimBlockDefault, stimBlockDefaultForce, stimLineDefault, materialBlockDefault
+from feconstants import *
 
 def getStimBlockFromCsv(filePath):
     rampLiftTimeArray, holdDisplArray = np.genfromtxt(filePath, delimiter=',').T
     stimBlock = {'rampLiftTimeArray': rampLiftTimeArray, 'holdDisplArray': holdDisplArray}
     return stimBlock
+
+
+def getRampLiftTimeArray(holdDisplArray):
+    return np.polyval(displtimecoeff, holdDisplArray)
+
+
+def getRampLiftTimeArrayForce(holdForceArray):
+    eqdisp = np.interp(holdForceArray, displforce[:, 1], displforce[:, 0]*1e3)
+    return np.polyval(displtimecoeff, eqdisp)
+
+
+def setHoldDisplArray(holdDisplArray, stimBlock=None):
+    if stimBlock is None:
+        stimBlock = copy.deepcopy(stimBlockDefault)
+    stimBlock['holdDisplArray'] = holdDisplArray
+    stimBlock['rampLiftTimeArray'] = getRampLiftTimeArray(holdDisplArray)
+    return stimBlock
+
+
+def setHoldForceArray(holdForceArray, stimBlockForce=None):
+    if stimBlockForce is None:
+        stimBlockForce = copy.deepcopy(stimBlockDefaultForce)
+    stimBlockForce['holdForceArray'] = holdForceArray
+    stimBlockForce['rampLiftTimeArray'] = getRampLiftTimeArrayForce(holdForceArray)
+    return stimBlockForce
 
 
 class Fiber:
