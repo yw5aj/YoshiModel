@@ -164,3 +164,9 @@ if __name__ == '__main__':
     # Get actual data
     sample_data = population_data[sample_ind[:6], :]
     np.savetxt('./csvs/repsample.csv', sample_data, delimiter=',')
+    columns = ['tau1', 'tau2', 'g1', 'g2', 'ginf', 'mu', 'alpha', 'thickness']
+    sample_data_df = pd.DataFrame(sample_data, columns=columns)
+    sample_data_df = sample_data_df[['thickness', 'mu', 'alpha',
+                                     'tau1', 'tau2', 'g1', 'g2', 'ginf']]
+    sample_data_df.index += 1
+    sample_data_df.to_csv('./csvs/repsample_df.csv')
