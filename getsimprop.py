@@ -149,18 +149,19 @@ if __name__ == '__main__':
     # Make the convergence plot
     covtot = (np.cov(norm_population_data, rowvar=0)**2).sum()
     covres_list = [covtot]
-    for i in range(41):
+    for i in range(population_data.shape[0]):
         sample_ind = add_sample(norm_population_data, sample_ind)
         covres_list.append(calculate_covres(norm_population_data, sample_ind))
     rel_err = np.array(covres_list) / covtot
     fig, axs = plt.subplots()
     axs.plot(100 * (1 - rel_err), '-k')
-    axs.set_title('Population N = 41')
+    axs.set_title('Population N = %d' % population_data.shape[0])
     axs.set_xlabel('# of samples')
-    axs.set_ylabel('% of covariance matrix')
+    axs.set_ylabel('% of population accounted for')
     axs.grid()
     fig.tight_layout()
     fig.savefig('./figures/cov_converge.png', dpi=300)
+    fig.savefig('./figures/cov_converge.pdf')
     # Get actual data
     sample_data = population_data[sample_ind[:6], :]
     np.savetxt('./csvs/repsample.csv', sample_data, delimiter=',')

@@ -57,7 +57,6 @@ class Fiber:
         elif doAnalysis:
             self.doAnalysis()
         self.finishFlag = True
-        return
 
     def runFiber(self, skipWait=False):
         for model in self.modelList:
@@ -70,27 +69,24 @@ class Fiber:
         for model in self.modelList:
             model.extractOutputs()
         for model in self.modelList:
-            model.transferOdb()
+            model.transferFile('odb')
+            model.transferFile('inp')
             model.deleteJob()
-        return
 
     def doAnalysis(self):
         for model in self.modelList:
             model.extractOutputs()
         self.getStaticForceDispl()
-        return
 
     def openBaseCae(self, caeFile='base_model_20150506'):
         caeFilePath = './CaeFiles/' + caeFile + '.cae'
         openMdb(pathName=caeFilePath)
-        return
 
     def getStaticForceDispl(self):
         self.timeList = [model.time for model in self.modelList]
         self.forceList = [model.force for model in self.modelList]
         self.displList = [model.displ for model in self.modelList]
         self.staticForceList, self.staticDisplList = getStaticForceDispl(self.timeList, self.forceList, self.displList)
-        return
 
 
 class Model:
@@ -102,7 +98,6 @@ class Model:
             setattr(self, key, value)
         self.modelName = modelName
         self.setUpModel()
-        return
 
     def setUpModel(self):
         self.copyModel()
@@ -113,16 +108,13 @@ class Model:
         setRampCurve(self.modelName, self.rampLiftTime)
         setHoldDispl(self.modelName, self.holdDispl)
         deleteLiftStep(self.modelName) # Skipping this to save model execution time - not using it now anyway
-        return
 
     def setMaterialProperties(self):
         set_skin_property_qlv(self.modelName, self.skin_g_array, self.skin_tau_array, self.skin_mu, self.skin_alpha)
         set_sylgard_property(self.modelName, self.sylgard_g, self.sylgard_tau, self.sylgard_c10)
-        return
 
     def copyModel(self):
         mdb.Model(name=self.modelName, objectToCopy=mdb.models['base_model'])
-        return
 
     def runModel(self):
         if self.modelName not in mdb.jobs:
@@ -133,23 +125,18 @@ class Model:
                 modelPrint=OFF, contactPrint=OFF, historyPrint=OFF, userSubroutine='',
                 scratch='', multiprocessingMode=DEFAULT, numCpus=1, numGPUs=0)
         mdb.jobs[self.modelName].submit(consistencyChecking=OFF)
-        return
 
     def waitForCompletion(self):
         mdb.jobs[self.modelName].waitForCompletion()
-        return
 
     def extractOutputs(self):
         self.time, self.force, self.displ, self.stress, self.strain, self.sener = getOutputs(self.modelName)
-        return
 
-    def transferOdb(self):
-        transferOdb(self.modelName)
-        return
+    def transferFile(self, fileExt):
+        transferFile(self.modelName, fileExt)
 
     def deleteJob(self):
         deleteJob(self.modelName)
-        return
 
 
 class FiberForce(Fiber):
@@ -167,8 +154,6 @@ class FiberForce(Fiber):
         elif doAnalysis:
             self.doAnalysis()
         self.finishFlag = True
-        return
-
 
 
 class ModelForce(Model):

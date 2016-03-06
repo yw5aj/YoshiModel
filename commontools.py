@@ -22,40 +22,6 @@ def writeLine(filePath, line):
     return
 
 
-def runModels(modelNames, deleteModel=False, fakeRun=False):
-    """
-    Deprecated
-    A wrapper to first run multiple models together, then transfer odb and 
-    lastly clean all job files, and return the list of job names. When the 
-    fakeRun is turned on (for debugging purposes), the model would not run 
-    at all.
-    """
-    if not fakeRun:
-        if type(modelNames) == str:
-            modelNames = [modelNames, ]
-        jobNames = []
-        for modelName in modelNames:
-            jobName = deleteJob(modelName)
-            submitJob(modelName, jobName)
-            jobNames.append(jobName)
-        for jobName in jobNames:
-            mdb.jobs[jobName].waitForCompletion()
-            transferOdb(jobName)
-            deleteJob(jobName)
-        if deleteModel:
-            for modelName in modelNames:
-                try:
-                    del mdb.models[modelName]
-                except KeyError:
-                    pass
-    elif fakeRun:
-        if type(modelNames) == str:
-            jobNames = [modelNames, ]
-        else:
-            jobnames = modelNames
-    return jobNames
-    
-
 def deleteJob(jobName, clearMdb=False):
     """
     Delete the job in mdb and associated files. Return a new name if conflict 
@@ -72,15 +38,17 @@ def deleteJob(jobName, clearMdb=False):
     return jobName
 
 
-def transferOdb(jobName):
+def transferFile(jobName, fileExt):
     """
-    Transfer the odb from the job to ./odbs/. 
+    Transfer the file to the corresponding folder.
     """
+    fname_src = '%s.%s' % (jobName, fileExt)
+    fname_dst = '%ss/%s.%s' % (fileExt, jobName, fileExt)
     try:
-        shutil.move('./'+jobName+'.odb', './odbs/'+jobName+'.odb')
+        shutil.move(fname_src, fname_dst)
     except WindowsError:
         try:
-            shutil.copy2('./'+jobName+'.odb', './odbs/'+jobName+'.odb')
+            shutil.copy2(fname_src, fname_dst)
         except:
             pass
     return
@@ -92,6 +60,7 @@ def deleteModel(modelName):
     except KeyError:
         pass
     return
+
 
 def submitJob(modelName, jobName, fakeRun=False):
     """
