@@ -4,9 +4,12 @@ os.chdir('x:/WorkFolder/AbaqusFolder/YoshiModel/')
 from setfiber import *
 
 repsampleArr = np.genfromtxt('./csvs/repsample.csv', delimiter=',')
-runFiber = True
+runFiber = False
+writeInput = True
+
+# Don't change
 runForce = False
-doAnalysis = True
+doAnalysis = False
 skipWait = True
 
 stimBlock = setHoldDisplArray(np.r_[.1:.6:6j])
@@ -16,14 +19,15 @@ def runSimulation(baseModelName, materialBlock):
     # Run displacement controlled analysis
     fiber = Fiber(baseModelName=baseModelName, materialBlock=materialBlock,
                   stimBlock=stimBlock,
-                  runFiber=runFiber, doAnalysis=doAnalysis, skipWait=skipWait)
+                  runFiber=runFiber, doAnalysis=doAnalysis, skipWait=skipWait,
+                  writeInput=writeInput)
     # Now to force controlled
     # Note: need to refactor the code to tune force levels yet 
     # if cylinder radius is not 0.5
     if runForce:
         fiberForce = FiberForce(fiber, runFiber=runFiber, doAnalysis=doAnalysis,
-                                stimBlock=stimBlockForce,
-                                skipWait=skipWait)
+                                stimBlock=stimBlockForce, skipWait=skipWait,
+                                writeInput=writeInput)
     return
 
 

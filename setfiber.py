@@ -37,7 +37,7 @@ def setHoldForceArray(holdForceArray, stimBlockForce=None):
 
 class Fiber:
 
-    def __init__(self, baseModelName='temp', suffix='Displ', stimBlock=stimBlockDefault, materialBlock=materialBlockDefault, skipWait=False, runFiber=True, doAnalysis=False):
+    def __init__(self, baseModelName='temp', suffix='Displ', stimBlock=stimBlockDefault, materialBlock=materialBlockDefault, skipWait=False, runFiber=True, doAnalysis=False, writeInput=False):
         self.finishFlag = False
         for key, value in stimBlock.items():
             setattr(self, key, value)
@@ -51,6 +51,8 @@ class Fiber:
         for i, modelName in enumerate(modelNameList):
             stimLine = {'rampLiftTime': self.rampLiftTimeArray[i], 'holdDispl': self.holdDisplArray[i]}
             self.modelList.append(Model(modelName, stimLine, materialBlock))
+        if writeInput and not runFiber:
+            self.writeInput()
         if runFiber:
             self.runFiber(skipWait=skipWait)
             self.getStaticForceDispl()
@@ -73,6 +75,11 @@ class Fiber:
             model.transferFile('inp')
             model.deleteJob()
 
+    def writeInput(self):
+        for model in self.modelList:
+            model.runModel(writeInputOnly=True)
+            model.transferFile('inp')
+            
     def doAnalysis(self):
         for model in self.modelList:
             model.extractOutputs()
@@ -116,7 +123,7 @@ class Model:
     def copyModel(self):
         mdb.Model(name=self.modelName, objectToCopy=mdb.models['base_model'])
 
-    def runModel(self):
+    def runModel(self, writeInputOnly=False):
         if self.modelName not in mdb.jobs:
             mdb.Job(name=self.modelName, model=self.modelName, description='',
                 type=ANALYSIS, atTime=None, waitMinutes=0, waitHours=0, queue=None,
@@ -124,7 +131,10 @@ class Model:
                 explicitPrecision=SINGLE, nodalOutputPrecision=SINGLE, echoPrint=OFF,
                 modelPrint=OFF, contactPrint=OFF, historyPrint=OFF, userSubroutine='',
                 scratch='', multiprocessingMode=DEFAULT, numCpus=1, numGPUs=0)
-        mdb.jobs[self.modelName].submit(consistencyChecking=OFF)
+        if writeInputOnly:
+            mdb.jobs[self.modelName].writeInput(consistencyChecking=OFF)
+        else:
+            mdb.jobs[self.modelName].submit(consistencyChecking=OFF)
 
     def waitForCompletion(self):
         mdb.jobs[self.modelName].waitForCompletion()
