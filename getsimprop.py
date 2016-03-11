@@ -41,7 +41,7 @@ def load_mat_dict():
 
 def get_simprop_df(param_df):
     """
-    Get median values for simulation.
+    Get statistical values for simulation.
     """
     # Creat the thicknesses and the alphas
     simprop_dict = {}
@@ -73,7 +73,7 @@ def get_simprop_df(param_df):
     return simprop_df
 
 
-def draw_boxplot(param_df, simprop_df):
+def draw_boxplot(param_df, simprop_df, bw_only=False):
     """
     Draw a boxplot for distribution of thickness, modulus and viscoelasticity.
     """
@@ -84,8 +84,9 @@ def draw_boxplot(param_df, simprop_df):
     bp_feature_array = np.c_[simprop_df.thickness, simprop_df.alpha,
                              simprop_df.ginf]
     bp_feature_array[0, 2] = param_df.ginf.min()
-    for line in bp.values():
-        plt.setp(line, color='k')
+    if bw_only:
+        for line in bp.values():
+            plt.setp(line, color='k')
     axs.set_yticks([])
     axs.set_ylim(bottom=-.1)
     for i in range(len(bp_labels)):
@@ -188,7 +189,6 @@ def add_sample(norm_population_data, old_sample_ind):
         new_sample_ind = np.array([((
             norm_population_data - norm_population_data.mean(
                 axis=0))**2).sum(axis=1).argmin()])
-        return new_sample_ind
     else:
         covres_array = np.zeros((norm_population_data.shape[0]))
         for new_ind in range(norm_population_data.shape[0]):
@@ -200,7 +200,7 @@ def add_sample(norm_population_data, old_sample_ind):
                     norm_population_data, new_sample_ind)
         new_ind = covres_array.argmin()
         new_sample_ind = np.r_[old_sample_ind, new_ind]
-        return new_sample_ind
+    return new_sample_ind
 
 
 def calculate_covres(population_data, sample_ind):
