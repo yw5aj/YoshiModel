@@ -3,7 +3,7 @@ from abaqus import *
 from abaqusConstants import *
 # Load output library
 o1 = session.openOdb(
-    name='X:/WorkFolder/AbaqusFolder/YoshiModel/odbs/SkinAlpha22Displ.odb')
+    name='X:/YuxiangWang/AbaqusFolder/YoshiModel/odbs/SkinAlpha22Displ.odb')
 session.viewports['Viewport: 1'].setValues(displayedObject=o1) 
 session.viewports['Viewport: 1'].odbDisplay.display.setValues(plotState=(
     CONTOURS_ON_DEF, ))   
@@ -33,13 +33,13 @@ session.viewports['Viewport: 1'].odbDisplay.setPrimaryVariable(
 # Save eps
 session.epsOptions.setValues(fontType=PS_ALWAYS, shadingQuality=EXTRA_FINE)
 session.printToFile(
-    fileName='X:/WorkFolder/AbaqusFolder/YoshiModel/figures/screenshot.eps', 
+    fileName='X:/YuxiangWang/AbaqusFolder/YoshiModel/figures/screenshot.eps', 
     format=EPS, canvasObjects=(session.viewports['Viewport: 1'], ))
 # Save png
 session.pngOptions.setValues(imageSize=(3000, 3337))
 session.printOptions.setValues(reduceColors=False)
 session.printToFile(
-    fileName='X:/WorkFolder/AbaqusFolder/YoshiModel/figures/screenshoot', 
+    fileName='X:/YuxiangWang/AbaqusFolder/YoshiModel/figures/screenshoot', 
     format=PNG, canvasObjects=(session.viewports['Viewport: 1'], ))
 # Zoom in and save png again
 session.viewports['Viewport: 1'].view.setValues(nearPlane=0.0380141, 
@@ -48,10 +48,10 @@ session.viewports['Viewport: 1'].view.setValues(nearPlane=0.0380141,
 session.pngOptions.setValues(imageSize=(3000, 3337))
 session.printOptions.setValues(reduceColors=False)
 session.printToFile(
-    fileName='X:/WorkFolder/AbaqusFolder/YoshiModel/figures/screenshoot_zoomed_in', 
+    fileName='X:/YuxiangWang/AbaqusFolder/YoshiModel/figures/screenshoot_zoomed_in', 
     format=PNG, canvasObjects=(session.viewports['Viewport: 1'], ))
 session.printToFile(
-    fileName='X:/WorkFolder/AbaqusFolder/YoshiModel/figures/screenshot_zoomed_in', 
+    fileName='X:/YuxiangWang/AbaqusFolder/YoshiModel/figures/screenshot_zoomed_in', 
     format=EPS, canvasObjects=(session.viewports['Viewport: 1'], ))    
 
 
@@ -61,7 +61,7 @@ from abaqusConstants import *
 def screenshot(jobName):
     # Load output library
     o1 = session.openOdb(
-        name='X:/WorkFolder/AbaqusFolder/YoshiModel/odbs/%s.odb' % jobName)
+        name='X:/YuxiangWang/AbaqusFolder/YoshiModel/odbs/%s.odb' % jobName)
     session.viewports['Viewport: 1'].setValues(displayedObject=o1) 
     session.viewports['Viewport: 1'].odbDisplay.display.setValues(plotState=(
         CONTOURS_ON_DEF, ))   
@@ -82,7 +82,7 @@ def screenshot(jobName):
     session.pngOptions.setValues(imageSize=(3000, 3337))
     session.printOptions.setValues(reduceColors=False)
     session.printToFile(
-        fileName='X:/WorkFolder/AbaqusFolder/YoshiModel/figures/screenshoot'+jobName, 
+        fileName='X:/YuxiangWang/AbaqusFolder/YoshiModel/figures/screenshoot'+jobName, 
         format=PNG, canvasObjects=(session.viewports['Viewport: 1'], ))
     # Zoom in and save png again
     session.viewports['Viewport: 1'].view.setValues(nearPlane=0.0380141, 
@@ -91,7 +91,7 @@ def screenshot(jobName):
     session.pngOptions.setValues(imageSize=(3000, 3337))
     session.printOptions.setValues(reduceColors=False)
     session.printToFile(
-        fileName='X:/WorkFolder/AbaqusFolder/YoshiModel/figures/screenshoot_zoomed_in'+jobName, 
+        fileName='X:/YuxiangWang/AbaqusFolder/YoshiModel/figures/screenshoot_zoomed_in'+jobName, 
         format=PNG, canvasObjects=(session.viewports['Viewport: 1'], ))
     return
 jobNameList = ['SkinThick%d2Force' % i for i in range(5)]

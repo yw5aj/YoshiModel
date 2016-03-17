@@ -1,5 +1,5 @@
 import os
-os.chdir('X:/WorkFolder/AbaqusFolder/YoshiModel')
+os.chdir('X:/YuxiangWang/AbaqusFolder/YoshiModel')
 from readodb import getAllStresses
 
 for i in range(5):

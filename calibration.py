@@ -1,5 +1,5 @@
 import os
-os.chdir('X:/WorkFolder/AbaqusFolder/YoshiModel')
+os.chdir('X:/YuxiangWang/AbaqusFolder/YoshiModel')
 from abqimport import *
 
 

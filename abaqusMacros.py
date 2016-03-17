@@ -23,7 +23,7 @@ def Macro1():
     import displayGroupOdbToolset as dgo
     import connectorBehavior
     mdb.openAuxMdb(
-        pathName='x:/WorkFolder/AbaqusFolder/YoshiModel/OldModel/ToHValidation0122.cae')
+        pathName='x:/YuxiangWang/AbaqusFolder/YoshiModel/OldModel/ToHValidation0122.cae')
     mdb.copyAuxMdbModel(fromName='2', toName='2')
     mdb.closeAuxMdb()
     del mdb.models['Model-1']

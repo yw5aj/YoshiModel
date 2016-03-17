@@ -18,7 +18,7 @@ df = pd.read_csv(fname, names=['time', 'force', 'displ', 'stress', 'strain',
                                'sener'])
 # Adjust displacement
 displcoeff = np.genfromtxt(
-    'X:/WorkFolder/DataAnalysis/YoshiRecordingData/csvs/displcoeff.csv', 
+    'X:/YuxiangWang/DataAnalysis/YoshiRecordingData/csvs/displcoeff.csv', 
     delimiter=',')
 displcoeff[0] *= 1e-6
 df.displ = df.displ * displcoeff[1] + displcoeff[0]

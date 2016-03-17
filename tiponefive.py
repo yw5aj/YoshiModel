@@ -1,5 +1,5 @@
 import os
-os.chdir('x:/WorkFolder/AbaqusFolder/YoshiModel/')
+os.chdir('x:/YuxiangWang/AbaqusFolder/YoshiModel/')
 
 from setfiber import *
 

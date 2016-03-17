@@ -30,7 +30,7 @@ def load_mat_dict():
     Load data from viscoelasticity dataset.
     """
     param_df = pd.DataFrame(loadmat(
-        'X:/WorkFolder/DataAnalysis/skinMechanicsAll/analysis/' +
+        'X:/YuxiangWang/DataAnalysis/skinMechanicsAll/analysis/' +
         'ViscoAnalysis052013/strain_level_2py.mat')['qlv2tFixPara'])
     param_df.columns = ['tau1', 'tau2', 'g1', 'g2', 'ginf', 'mu', 'alpha',
                         'r2', 'stretch', 'thickness', 'skin_id', 'ramp_time']
@@ -142,7 +142,7 @@ def get_repsample(param_df, dataset='2013'):
         population_data = population_data[unique_skin_ind, :]
     elif dataset == '2011':
         xlsx_df = pd.read_excel(
-            'X:/WorkFolder/WorkArchive/DocumentFolder201507/分析/201404/' +
+            'X:/YuxiangWang/WorkArchive/DocumentFolder201507/分析/201404/' +
             'ViscoAnalysis0411.xlsm', sheetname='SummerFast',
             index_col=None, header=None)
         qlv_params = xlsx_df.iloc[5:49, 25:32].values.astype('f')

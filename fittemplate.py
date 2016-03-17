@@ -1,5 +1,5 @@
 import os
-os.chdir('x:/WorkFolder/AbaqusFolder/YoshiModel/')
+os.chdir('x:/YuxiangWang/AbaqusFolder/YoshiModel/')
 
 
 import numpy as np
