@@ -128,7 +128,33 @@ def get_repsample(param_df, dataset='2013'):
     """
     Get representative samples with a step-wise method.
     """
-    # Load dataset
+    # Load data
+    population_data = load_dataset(dataset=dataset)
+    norm_population_data = scale(population_data)
+    sample_ind = np.array([])
+    covtot = (np.cov(norm_population_data, rowvar=0)**2).sum()
+    covres_list = [covtot]
+    # Add samples recursively
+    for i in range(population_data.shape[0]):
+        sample_ind = add_sample(norm_population_data, sample_ind)
+        covres_list.append(calculate_covres(norm_population_data, sample_ind))
+    # Plot the convergence rate
+    rel_err = np.array(covres_list) / covtot
+    plot_convergence(rel_err)
+    # Get actual data
+    sample_data = population_data[sample_ind[:6], :]
+    np.savetxt('./csvs/repsample.csv', sample_data, delimiter=',')
+    # Make the dataframe version for paper writing
+    columns = ['tau1', 'tau2', 'g1', 'g2', 'ginf', 'mu', 'alpha', 'thickness']
+    sample_data_df = pd.DataFrame(sample_data, columns=columns)
+    sample_data_df = sample_data_df[['thickness', 'mu', 'alpha',
+                                     'tau1', 'tau2', 'g1', 'g2', 'ginf']]
+    sample_data_df.index += 1  # Index start from 1 for biologists
+    sample_data_df.to_csv('./csvs/repsample_df.csv')
+    return sample_data_df
+
+
+def load_dataset(dataset):
     if dataset == '2013':
         population_data = np.c_[
             param_df.tau1, param_df.tau2, param_df.g1, param_df.g2,
@@ -148,36 +174,7 @@ def get_repsample(param_df, dataset='2013'):
         qlv_params = xlsx_df.iloc[5:49, 25:32].values.astype('f')
         thickness = xlsx_df.iloc[5:49, 10].values.astype('f')
         population_data = np.c_[qlv_params, thickness]
-    norm_population_data = scale(population_data)
-    sample_ind = np.array([])
-    covtot = (np.cov(norm_population_data, rowvar=0)**2).sum()
-    covres_list = [covtot]
-    for i in range(population_data.shape[0]):
-        sample_ind = add_sample(norm_population_data, sample_ind)
-        covres_list.append(calculate_covres(norm_population_data, sample_ind))
-    rel_err = np.array(covres_list) / covtot
-    # Plot the convergence rate
-    fig, axs = plt.subplots()
-    axs.plot(100 * (1 - rel_err), '-k')
-    axs.set_title('Population N = %d' % population_data.shape[0])
-    axs.set_xlabel('# of samples')
-    axs.set_ylabel('% of population accounted for')
-    axs.grid()
-    fig.tight_layout()
-    fig.savefig('./figures/cov_converge.png', dpi=300)
-    fig.savefig('./figures/cov_converge.pdf')
-    plt.close(fig)
-    # Get actual data
-    sample_data = population_data[sample_ind[:6], :]
-    np.savetxt('./csvs/repsample.csv', sample_data, delimiter=',')
-    # Make the dataframe version for paper writing
-    columns = ['tau1', 'tau2', 'g1', 'g2', 'ginf', 'mu', 'alpha', 'thickness']
-    sample_data_df = pd.DataFrame(sample_data, columns=columns)
-    sample_data_df = sample_data_df[['thickness', 'mu', 'alpha',
-                                     'tau1', 'tau2', 'g1', 'g2', 'ginf']]
-    sample_data_df.index += 1  # Index start from 1 for biologists
-    sample_data_df.to_csv('./csvs/repsample_df.csv')
-    return sample_data_df
+    return population_data
 
 
 def add_sample(norm_population_data, old_sample_ind):
@@ -213,6 +210,19 @@ def calculate_covres(population_data, sample_ind):
     sample_cov = np.cov(sample_data, rowvar=0)
     covres = ((population_cov - sample_cov)**2).sum()
     return covres
+
+
+def plot_convergence(rel_err, fname='cov_converge'):
+    fig, axs = plt.subplots()
+    axs.plot(100 * (1 - rel_err), '-k')
+    axs.set_title('Population N = %d' % rel_err.size)
+    axs.set_xlabel('# of samples')
+    axs.set_ylabel('% of population accounted for')
+    axs.grid()
+    fig.tight_layout()
+    fig.savefig('./figures/%s.png' % fname, dpi=300)
+    fig.savefig('./figures/%s.pdf' % fname)
+    plt.close(fig)
 
 
 if __name__ == '__main__':
